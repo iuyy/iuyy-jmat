@@ -1,4 +1,4 @@
-package net.iuyy.jmat.util;
+package net.iuyy.jmat.jama.util;
 
 public class Maths {
 

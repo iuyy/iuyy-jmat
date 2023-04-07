@@ -1,5 +1,5 @@
-package net.iuyy.jmat;
-import net.iuyy.jmat.util.*;
+package net.iuyy.jmat.jama;
+import net.iuyy.jmat.jama.util.*;
 
 /** QR Decomposition.
 <P>

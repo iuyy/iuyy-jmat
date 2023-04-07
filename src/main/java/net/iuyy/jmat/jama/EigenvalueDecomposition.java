@@ -1,5 +1,5 @@
-package net.iuyy.jmat;
-import net.iuyy.jmat.util.*;
+package net.iuyy.jmat.jama;
+import net.iuyy.jmat.jama.util.*;
 
 /** Eigenvalues and eigenvectors of a real matrix. 
 <P>

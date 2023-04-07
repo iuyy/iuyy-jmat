@@ -1,4 +1,4 @@
-package net.iuyy.jmat;
+package net.iuyy.jmat.jama;
 
    /** Cholesky Decomposition.
    <P>

@@ -8,12 +8,18 @@ package net.iuyy.jmat.base;
  * @description
  *
  */
-public interface Matrix {
+public interface Matrix<E> {
 
     Object[][] getData();
 
     int getRows();
 
     int getColumns();
+
+    E get(int row, int column);
+
+    Double getDouble(int row, int column);
+
+    void set(int row, int column, E data);
 
 }

@@ -25,9 +25,6 @@ public interface Arithmetic {
      */
     Matrix plus(Object obj);
 
-    Matrix plus(Matrix mat);
-
-
     /**
      * 减法
      * C = A - B
@@ -42,8 +39,6 @@ public interface Arithmetic {
      * @return
      */
     Matrix minus(Object obj);
-
-    Matrix minus(Matrix mat);
 
     /**
      * 乘法

@@ -12,7 +12,7 @@ import java.util.List;
  * @date 2023-04-07 17:00
  * @description
  */
-public class RowMatrix extends RowVector {
+public class RowMatrix<E> extends RowVector<E> {
 
     public RowMatrix(int column){
         this.rows = 1;

@@ -7,7 +7,7 @@ package net.iuyy.jmat.base;
  * @date 2023-04-07 16:56
  * @description
  */
-public interface Vector {
+public interface Vector<E> extends Matrix<E> {
 
     /**
      * 行向量与列向量：在某个方向上的维度为1;

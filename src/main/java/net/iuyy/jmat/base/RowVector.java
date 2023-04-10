@@ -7,7 +7,7 @@ package net.iuyy.jmat.base;
  * @date 2023-04-07 16:57
  * @description
  */
-public abstract class RowVector extends AbstractMatrix implements Vector {
+public abstract class RowVector<E> extends AbstractMatrix<E> implements Vector<E> {
 
     @Override
     public boolean isVector(){

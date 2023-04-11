@@ -1,83 +1,157 @@
-package net.iuyy.jmat.base;
+package net.iuyy.jmat.util;
 
+import net.iuyy.jmat.base.Matrix;
 import net.iuyy.jmat.common.Pattern;
 import net.iuyy.jmat.common.Symbol;
 import net.iuyy.jmat.exception.TypeException;
 import net.iuyy.jmat.matrix.MixMatrix;
 import net.iuyy.jmat.matrix.NumberMatrix;
+import net.iuyy.jmat.matrix.RowMatrix;
 import net.iuyy.jmat.matrix.StringMatrix;
 
 /**
  * @author iuyy
  * @version v1.0
  * @corporation Copyright by iuyy.net
- * @date 2023-04-07 16:22
+ * @date 2023-04-11 15:52
  * @description
  */
-public abstract class AbstractMatrix<E> implements Matrix<E> {
+public class Matrices {
 
-    protected Object[][] data;
-    protected int rows;
-    protected int columns;
-
-    @Override
-    public Object[][] getData() {
-        return this.data;
-    }
-
-    @Override
-    public int getRows() {
-        return this.rows;
-    }
-
-    @Override
-    public int getColumns() {
-        return this.columns;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public E get(int row, int column){
-        return (E)(data[row][column]);
-    }
-
-    @Override
-    public Double getDouble(int row, int column){
-        Object cell = data[row][column];
-        if (String.valueOf(cell).matches(Pattern.NUMBER)) {
-            return Double.parseDouble(String.valueOf(cell));
-        } else {
-            throw new TypeException("该值不是数值类型或不能转换成数据类型！");
-        }
-    }
-
-    @Override
-    public String getStr(int row, int column){
-        Object cell = data[row][column];
-        return String.valueOf(cell);
-    }
-
-    @Override
-    public void set(int row, int column, E data){
-        this.data[row][column] = data;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("[");
-        sb.append("\n");
-        for (int i = 0; i < this.rows; i++) {
-            sb.append("\t[");
-            for (int j = 0; j < this.columns; j++) {
-                sb.append("\t").append(get(i,j));
+    public static boolean isNaN(Matrix matrix){
+        for (int i = 0; i < matrix.getRows(); i++) {
+            for (int j = 0; j < matrix.getColumns(); j++) {
+                String cell = matrix.getStr(i, j);
+                if (!cell.matches(Pattern.NUMBER)){
+                    return true;
+                }
             }
-            sb.append("]\n");
         }
-        sb.append("]");
-        return sb.toString();
+        return false;
     }
 
-    private Matrix getNumberMatrix(Matrix origin, Number obj, String symbol) {
+    /**
+     * 生成一个 NaN 方阵
+     * @param row 行
+     * @param column 列
+     * @return 矩阵
+     */
+    public static Matrix nan(int row, int column){
+        Matrix<String> result = new MixMatrix<>(row, column);
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < column; j++) {
+                result.set(i, j,"Nan");
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 生成一个 1 方阵
+     * @param row 行
+     * @param column 列
+     * @return 矩阵
+     */
+    public static Matrix ones(int row, int column){
+        Matrix<Integer> result = new MixMatrix<>(row, column);
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < column; j++) {
+                result.set(i, j,1);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 生成一个 0 方阵
+     * @param row 行
+     * @param column 列
+     * @return 矩阵
+     */
+    public static Matrix zeros(int row, int column){
+        Matrix<Integer> result = new MixMatrix<>(row,column);
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < column; j++) {
+                result.set(i,j,0);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 纵向合并两个矩阵
+     * matlab: [A; B] 表示纵向合并两个矩阵
+     * @param origin 矩阵1
+     * @param target 矩阵2
+     * @return 合并后矩阵
+     * [[1，2]，
+     *  [3，4]]
+     * [[5，6]，
+     *  [7，8]]
+     *  合并后：
+     * [[1，2]，
+     *  [3，4]，
+     *  [5，6]
+     *  [7，8]]
+     */
+    public static Matrix verticalMerge(Matrix origin, Matrix target){
+        Matrix<Object> result = new MixMatrix<>(origin.getRows() + target.getRows(), origin.getColumns());
+        System.arraycopy(origin.getData(), 0, result.getData(), 0, origin.getRows());
+        System.arraycopy(target.getData(), 0, result.getData(), origin.getRows(), target.getRows());
+        return result;
+    }
+
+    /**
+     * 横向合并两个矩阵
+     * matlab: [A, B] 表示纵向合并两个矩阵
+     *         [A  B] 表示纵向合并两个矩阵
+     * @param origin 矩阵1
+     * @param target 矩阵2
+     * @return 合并后的矩阵
+     * [[1，2]，
+     *  [3，4]]
+     * [[5，6]，
+     *  [7，8]]
+     *  合并后：
+     * [[1，2，5，6]
+     *  [3，4，7，8]]
+     */
+    public static Matrix horizontalMerge(Matrix origin, Matrix target){
+        Matrix<Object> result = new MixMatrix<>(origin.getRows(), origin.getColumns() + target.getColumns());
+        for (int i = 0; i < origin.getRows(); i++) {
+            for (int j = 0; j < origin.getColumns(); j++) {
+                result.set(i,j, origin.get(i,j));
+            }
+        }
+        for (int i = 0; i < target.getRows(); i++) {
+            for (int j = 0; j < target.getColumns(); j++) {
+                result.set(i, origin.getColumns() + j, target.get(i,j));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 生成对角矩阵
+     * @param matrix 行向量
+     * @param offset 偏移量
+     * @return 对角矩阵
+     */
+    public static Matrix diag(RowMatrix matrix, int offset){
+        Matrix<Object> result = new MixMatrix<>(matrix.getColumns(), matrix.getColumns());
+        for (int i = 0; i < result.getRows(); i++) {
+            for (int j = 0; j < result.getColumns(); j++) {
+                if (i == j + offset) {
+                    result.set(i,j, matrix.get(0,j));
+                } else {
+                    result.set(i,j, 0);
+                }
+            }
+        }
+        return result;
+    }
+
+    private static Matrix getNumberMatrix(Matrix origin, Number obj, String symbol) {
         NumberMatrix result = new NumberMatrix(origin.getRows(), origin.getColumns());
         for (int i = 0; i < origin.getRows(); i++) {
             for (int j = 0; j < origin.getColumns(); j++) {
@@ -99,7 +173,7 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
         return result;
     }
 
-    private Matrix getStringMatrix(Matrix origin, String obj) {
+    private static Matrix getStringMatrix(Matrix origin, String obj) {
         StringMatrix result = new StringMatrix(origin.getRows(), origin.getColumns());
         // 拼接字符串
         for (int i = 0; i < origin.getRows(); i++) {
@@ -111,7 +185,7 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
         return result;
     }
 
-    private Matrix getMixMatrix(Matrix origin, Matrix target, String symbol) {
+    private static Matrix getMixMatrix(Matrix origin, Matrix target, String symbol) {
         int r = Math.max(origin.getRows(), target.getRows());
         int c = Math.max(origin.getColumns(), target.getColumns());
         Matrix<Object> result = new MixMatrix<>(r, c);
@@ -158,17 +232,16 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
      * @return
      */
-    @Override
-    public Matrix plus(Object obj){
+    public static Matrix plus(Matrix matrix, Object obj){
         if (obj instanceof Number) {
             // 加数值
-            return getNumberMatrix(this, (Number) obj, Symbol.ADDITION);
+            return getNumberMatrix(matrix, (Number) obj, Symbol.ADDITION);
 
         } else if (obj instanceof String) {
-            return getStringMatrix(this, (String) obj);
+            return getStringMatrix(matrix, (String) obj);
 
         } else if (obj instanceof Matrix) {
-            return getMixMatrix(this, (Matrix) obj, Symbol.ADDITION);
+            return getMixMatrix(matrix, (Matrix) obj, Symbol.ADDITION);
 
         } else {
             throw new TypeException("该参数的数据类型不被支持！");
@@ -188,13 +261,12 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
      * @return
      */
-    @Override
-    public Matrix minus(Object obj){
+    public static Matrix minus(Matrix matrix, Object obj){
         if (obj instanceof Number) {
-            return getNumberMatrix(this, (Number) obj, Symbol.SUBTRACTION);
+            return getNumberMatrix(matrix, (Number) obj, Symbol.SUBTRACTION);
 
         } else if (obj instanceof Matrix) {
-            return getMixMatrix(this, (Matrix) obj, Symbol.SUBTRACTION);
+            return getMixMatrix(matrix, (Matrix) obj, Symbol.SUBTRACTION);
 
         } else {
             throw new TypeException("该参数的数据类型不被支持！");
@@ -214,13 +286,12 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
      * @return
      */
-    @Override
-    public Matrix times(Object obj){
+    public static Matrix times(Matrix matrix, Object obj){
         if (obj instanceof Number) {
-            return getNumberMatrix(this, (Number) obj, Symbol.MULTIPLICATION);
+            return getNumberMatrix(matrix, (Number) obj, Symbol.MULTIPLICATION);
 
         } else if (obj instanceof Matrix) {
-            return getMixMatrix(this, (Matrix) obj, Symbol.MULTIPLICATION);
+            return getMixMatrix(matrix, (Matrix) obj, Symbol.MULTIPLICATION);
 
         } else {
             throw new TypeException("该参数的数据类型不被支持！");
@@ -253,15 +324,14 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
      *          [d1+e2+f3] [d2+e4+f6]}
      * @return
      */
-    @Override
-    public Matrix mTimes(Matrix matrix){
-        NumberMatrix newMatrix = new NumberMatrix(this.rows, matrix.getColumns());
-        for (int rowIndex = 0; rowIndex < this.rows; rowIndex++) {
-            for (int columnIndex = 0; columnIndex < matrix.getColumns(); columnIndex++) {
+    public static Matrix mTimes(Matrix origin, Matrix target){
+        NumberMatrix newMatrix = new NumberMatrix(origin.getRows(), target.getColumns());
+        for (int rowIndex = 0; rowIndex < origin.getRows(); rowIndex++) {
+            for (int columnIndex = 0; columnIndex < target.getColumns(); columnIndex++) {
                 double product = 0;
-                for (int i = 0; i < matrix.getRows(); i++) {
-                    double aCell = this.getDouble(rowIndex, i);
-                    double bCell = matrix.getDouble(i, columnIndex);
+                for (int i = 0; i < target.getRows(); i++) {
+                    double aCell = origin.getDouble(rowIndex, i);
+                    double bCell = target.getDouble(i, columnIndex);
                     product += (aCell * bCell);
                 }
                 newMatrix.set(rowIndex, columnIndex, product);
@@ -282,13 +352,12 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
      * @return
      */
-    @Override
-    public Matrix rDivide(Object obj){
+    public static Matrix rDivide(Matrix origin, Object obj){
         if (obj instanceof Number) {
-            return getNumberMatrix(this, (Number) obj, Symbol.DIVISION_RIGHT);
+            return getNumberMatrix(origin, (Number) obj, Symbol.DIVISION_RIGHT);
 
         } else if (obj instanceof Matrix) {
-            return getMixMatrix(this, (Matrix) obj, Symbol.DIVISION_RIGHT);
+            return getMixMatrix(origin, (Matrix) obj, Symbol.DIVISION_RIGHT);
 
         } else {
             throw new TypeException("该参数的数据类型不被支持！");
@@ -307,13 +376,12 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
      * @return
      */
-    @Override
-    public Matrix lDivide(Object obj){
+    public static Matrix lDivide(Matrix origin, Object obj){
         if (obj instanceof Number) {
-            return getNumberMatrix(this, (Number) obj, Symbol.DIVISION_LEFT);
+            return getNumberMatrix(origin, (Number) obj, Symbol.DIVISION_LEFT);
 
         } else if (obj instanceof Matrix) {
-            return getMixMatrix(this, (Matrix) obj, Symbol.DIVISION_LEFT);
+            return getMixMatrix(origin, (Matrix) obj, Symbol.DIVISION_LEFT);
 
         } else {
             throw new TypeException("该参数的数据类型不被支持！");
@@ -333,9 +401,7 @@ public abstract class AbstractMatrix<E> implements Matrix<E> {
      * 3. 如果 A 是矩形 m×n 矩阵，且 m ~= n，B 是 n 列矩阵，那么 x=B/A 返回方程组 x*A = B 的最小二乘解。
      * @return
      */
-    @Override
-    public Matrix mrDivide(){
+    public static Matrix mrDivide(){
         return null;
     }
-
 }

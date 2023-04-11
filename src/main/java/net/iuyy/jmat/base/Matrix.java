@@ -20,6 +20,7 @@ public interface Matrix<E> extends Arithmetic {
 
     Double getDouble(int row, int column);
 
-    void set(int row, int column, E data);
+    String getStr(int i, int j);
 
+    void set(int row, int column, E data);
 }

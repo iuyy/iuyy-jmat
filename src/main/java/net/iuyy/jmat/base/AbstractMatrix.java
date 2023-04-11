@@ -1,6 +1,7 @@
 package net.iuyy.jmat.base;
 
 import net.iuyy.jmat.common.Pattern;
+import net.iuyy.jmat.common.Symbol;
 import net.iuyy.jmat.exception.TypeException;
 import net.iuyy.jmat.matrix.MixMatrix;
 import net.iuyy.jmat.matrix.NumberMatrix;
@@ -13,7 +14,7 @@ import net.iuyy.jmat.matrix.StringMatrix;
  * @date 2023-04-07 16:22
  * @description
  */
-public abstract class AbstractMatrix<E> implements Matrix<E>, Arithmetic {
+public abstract class AbstractMatrix<E> implements Matrix<E> {
 
     protected Object[][] data;
     protected int rows;
@@ -55,6 +56,88 @@ public abstract class AbstractMatrix<E> implements Matrix<E>, Arithmetic {
         this.data[row][column] = data;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("[");
+        sb.append("\n");
+        for (int i = 0; i < this.rows; i++) {
+            sb.append("\t[");
+            for (int j = 0; j < this.columns; j++) {
+                sb.append("\t").append(get(i,j));
+            }
+            sb.append("]\n");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private Matrix getNumberMatrix(Matrix origin, Number obj, String symbol) {
+        NumberMatrix result = new NumberMatrix(origin.getRows(), origin.getColumns());
+        for (int i = 0; i < origin.getRows(); i++) {
+            for (int j = 0; j < origin.getColumns(); j++) {
+                Double newValue = null;
+                if (symbol.equals(Symbol.ADDITION)) {
+                    newValue = origin.getDouble(i, j) + obj.doubleValue();
+                } else if (symbol.equals(Symbol.SUBTRACTION)) {
+                    newValue = origin.getDouble(i, j) - obj.doubleValue();
+                } else if (symbol.equals(Symbol.MULTIPLICATION)) {
+                    newValue = origin.getDouble(i, j) * obj.doubleValue();
+                } else if (symbol.equals(Symbol.DIVISION_RIGHT)) {
+                    newValue = origin.getDouble(i, j) / obj.doubleValue();
+                } else if (symbol.equals(Symbol.DIVISION_LEFT)) {
+                    newValue = obj.doubleValue() / origin.getDouble(i, j);
+                }
+                result.set(i, j, newValue);
+            }
+        }
+        return result;
+    }
+
+    private Matrix getStringMatrix(Matrix origin, String obj) {
+        StringMatrix result = new StringMatrix(origin.getRows(), origin.getColumns());
+        // 拼接字符串
+        for (int i = 0; i < origin.getRows(); i++) {
+            for (int j = 0; j < origin.getColumns(); j++) {
+                String newValue = origin.get(i, j) + obj;
+                result.set(i, j, newValue);
+            }
+        }
+        return result;
+    }
+
+    private Matrix getMixMatrix(Matrix origin, Matrix target, String symbol) {
+        int r = Math.max(origin.getRows(), target.getRows());
+        int c = Math.max(origin.getColumns(), target.getColumns());
+        Matrix<Object> result = new MixMatrix<>(r, c);
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
+                int cIndex1 = j >= origin.getColumns() ? 0 : j;
+                int rIndex1 = i >= origin.getRows() ? 0 : i;
+                Double aValue = origin.getDouble(rIndex1, cIndex1);
+
+                int rIndex2 = target.getRows() == 1 ? 0 : i;
+                int cIndex2 = target.getColumns() == 1 ? 0 : j;
+                Double bValue = target.getDouble(rIndex2, cIndex2);
+
+                Double newValue = null;
+                if (symbol.equals(Symbol.ADDITION)) {
+                    newValue = aValue + bValue;
+                } else if (symbol.equals(Symbol.SUBTRACTION)) {
+                    newValue = aValue - bValue;
+                } else if (symbol.equals(Symbol.MULTIPLICATION)) {
+                    newValue = aValue * bValue;
+                } else if (symbol.equals(Symbol.DIVISION_RIGHT)) {
+                    newValue = aValue / bValue;
+                } else if (symbol.equals(Symbol.DIVISION_LEFT)) {
+                    newValue = bValue / aValue;
+                }
+
+                result.set(i, j, newValue);
+            }
+        }
+        return result;
+    }
+
     /**
      * 加法
      * C = A + B
@@ -73,47 +156,13 @@ public abstract class AbstractMatrix<E> implements Matrix<E>, Arithmetic {
     public Matrix plus(Object obj){
         if (obj instanceof Number) {
             // 加数值
-            NumberMatrix result = new NumberMatrix(this.rows, this.columns);
-            Number value = (Number) obj;
-            for (int i = 0; i < this.rows; i++) {
-                for (int j = 0; j < this.columns; j++) {
-                    Double newValue = getDouble(i, j) + value.doubleValue();
-                    result.set(i, j, newValue);
-                }
-            }
-            return result;
+            return getNumberMatrix(this, (Number) obj, Symbol.ADDITION);
 
         } else if (obj instanceof String) {
-            StringMatrix result = new StringMatrix(this.rows, this.columns);
-            // 拼接字符串
-            String value = (String) obj;
-            for (int i = 0; i < this.rows; i++) {
-                for (int j = 0; j < this.columns; j++) {
-                    String newValue = get(i, j) + value;
-                    result.set(i, j, newValue);
-                }
-            }
-            return result;
+            return getStringMatrix(this, (String) obj);
 
         } else if (obj instanceof Matrix) {
-            Matrix value = (Matrix) obj;
-            int r = Math.max(this.rows, value.getRows());
-            int c = Math.max(this.columns, value.getColumns());
-            Matrix<Object> result = new MixMatrix<>(r, c);
-            for (int i = 0; i < r; i++) {
-                for (int j = 0; j < c; j++) {
-                    int rIndex1 = j >= this.columns ? 0 : j;
-                    int cIndex1 = i >= this.rows ? 0 : i;
-                    Double aValue = this.getDouble(rIndex1, cIndex1);
-
-                    int rIndex2 = value.getRows() == 1 ? 0 : i;
-                    int cIndex2 = value.getColumns() == 1 ? 0 : j;
-                    Double bValue = value.getDouble(rIndex2, cIndex2);
-
-                    result.set(i, j, aValue + bValue);
-                }
-            }
-            return result;
+            return getMixMatrix(this, (Matrix) obj, Symbol.ADDITION);
 
         } else {
             throw new TypeException("该参数的数据类型不被支持！");
@@ -135,8 +184,15 @@ public abstract class AbstractMatrix<E> implements Matrix<E>, Arithmetic {
      */
     @Override
     public Matrix minus(Object obj){
+        if (obj instanceof Number) {
+            return getNumberMatrix(this, (Number) obj, Symbol.SUBTRACTION);
 
-        return null;
+        } else if (obj instanceof Matrix) {
+            return getMixMatrix(this, (Matrix) obj, Symbol.SUBTRACTION);
+
+        } else {
+            throw new TypeException("该参数的数据类型不被支持！");
+        }
     }
 
     /**
@@ -153,8 +209,16 @@ public abstract class AbstractMatrix<E> implements Matrix<E>, Arithmetic {
      * @return
      */
     @Override
-    public Matrix times(){
-        return null;
+    public Matrix times(Object obj){
+        if (obj instanceof Number) {
+            return getNumberMatrix(this, (Number) obj, Symbol.MULTIPLICATION);
+
+        } else if (obj instanceof Matrix) {
+            return getMixMatrix(this, (Matrix) obj, Symbol.MULTIPLICATION);
+
+        } else {
+            throw new TypeException("该参数的数据类型不被支持！");
+        }
     }
 
     /**
@@ -184,8 +248,20 @@ public abstract class AbstractMatrix<E> implements Matrix<E>, Arithmetic {
      * @return
      */
     @Override
-    public Matrix mTimes(){
-        return null;
+    public Matrix mTimes(Matrix matrix){
+        NumberMatrix newMatrix = new NumberMatrix(this.rows, matrix.getColumns());
+        for (int rowIndex = 0; rowIndex < this.rows; rowIndex++) {
+            for (int columnIndex = 0; columnIndex < matrix.getColumns(); columnIndex++) {
+                double product = 0;
+                for (int i = 0; i < matrix.getRows(); i++) {
+                    double aCell = this.getDouble(rowIndex, i);
+                    double bCell = matrix.getDouble(i, columnIndex);
+                    product += (aCell * bCell);
+                }
+                newMatrix.set(rowIndex, columnIndex, product);
+            }
+        }
+        return newMatrix;
     }
 
     /**
@@ -201,8 +277,16 @@ public abstract class AbstractMatrix<E> implements Matrix<E>, Arithmetic {
      * @return
      */
     @Override
-    public Matrix rDivide(){
-        return null;
+    public Matrix rDivide(Object obj){
+        if (obj instanceof Number) {
+            return getNumberMatrix(this, (Number) obj, Symbol.DIVISION_RIGHT);
+
+        } else if (obj instanceof Matrix) {
+            return getMixMatrix(this, (Matrix) obj, Symbol.DIVISION_RIGHT);
+
+        } else {
+            throw new TypeException("该参数的数据类型不被支持！");
+        }
     }
 
     /**
@@ -218,8 +302,16 @@ public abstract class AbstractMatrix<E> implements Matrix<E>, Arithmetic {
      * @return
      */
     @Override
-    public Matrix lDivide(){
-        return null;
+    public Matrix lDivide(Object obj){
+        if (obj instanceof Number) {
+            return getNumberMatrix(this, (Number) obj, Symbol.DIVISION_LEFT);
+
+        } else if (obj instanceof Matrix) {
+            return getMixMatrix(this, (Matrix) obj, Symbol.DIVISION_LEFT);
+
+        } else {
+            throw new TypeException("该参数的数据类型不被支持！");
+        }
     }
 
     /**

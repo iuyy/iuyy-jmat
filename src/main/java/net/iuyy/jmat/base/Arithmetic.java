@@ -21,7 +21,7 @@ public interface Arithmetic {
      * 则这两个数组会隐式扩展以相互匹配。例如，如果 A 或 B 中的一个是标量，
      * 则该标量与另一个数组的每个元素相结合。
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
-     * @return
+     * @return 矩阵
      */
     Matrix plus(Object obj);
 
@@ -36,7 +36,7 @@ public interface Arithmetic {
      * 如果 A 和 B 的大小兼容，则这两个数组会隐式扩展以相互匹配。
      * 例如，如果 A 或 B 是标量，则该标量与另一个数组的每个元素相结合。
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
-     * @return
+     * @return 矩阵
      */
     Matrix minus(Object obj);
 
@@ -51,9 +51,9 @@ public interface Arithmetic {
      * 如果 A 和 B 的大小兼容，则这两个数组会隐式扩展以相互匹配。
      * 例如，如果 A 或 B 中的一个是标量，则该标量与另一个数组的每个元素相结合。
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
-     * @return
+     * @return 矩阵
      */
-    Matrix times();
+    Matrix times(Object obj);
 
     /**
      * 矩阵乘法
@@ -79,9 +79,9 @@ public interface Arithmetic {
      *      5 6}
      * A * B = {[a1+b2+c3] [a2+b4+C6]
      *          [d1+e2+f3] [d2+e4+f6]}
-     * @return
+     * @return 矩阵
      */
-    Matrix mTimes();
+    Matrix mTimes(Matrix matrix);
 
     /**
      * 数组右除
@@ -93,9 +93,9 @@ public interface Arithmetic {
      * 如果 A 和 B 的大小兼容，则这两个数组会隐式扩展以相互匹配。
      * 例如，如果 A 或 B 中的一个是标量，则该标量与另一个数组的每个元素相结合。
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
-     * @return
+     * @return 矩阵
      */
-    Matrix rDivide();
+    Matrix rDivide(Object obj);
 
     /**
      * 数组左除
@@ -107,9 +107,9 @@ public interface Arithmetic {
      * 如果 A 和 B 的大小兼容，则这两个数组会隐式扩展以相互匹配。
      * 例如，如果 A 或 B 中的一个是标量，则该标量与另一个数组的每个元素相结合。
      * 此外，具有不同方向的向量（一个为行向量，另一个为列向量）会隐式扩展以形成矩阵。
-     * @return
+     * @return 矩阵
      */
-    Matrix lDivide();
+    Matrix lDivide(Object obj);
 
     /**
      * 求解关于 x 的线性方程组 xA = B
@@ -122,7 +122,7 @@ public interface Arithmetic {
      * 1. 如果 A 是标量，那么 B/A 等于 B./A。
      * 2. 如果 A 是 n×n 方阵，B 是 n 列矩阵，那么 x = B/A 是方程 x*A = B 的解（如果存在解的话）。
      * 3. 如果 A 是矩形 m×n 矩阵，且 m ~= n，B 是 n 列矩阵，那么 x=B/A 返回方程组 x*A = B 的最小二乘解。
-     * @return
+     * @return 矩阵
      */
     Matrix mrDivide();
 

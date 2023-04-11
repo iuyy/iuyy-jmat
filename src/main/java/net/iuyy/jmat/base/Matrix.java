@@ -8,7 +8,7 @@ package net.iuyy.jmat.base;
  * @description
  *
  */
-public interface Matrix<E> {
+public interface Matrix<E> extends Arithmetic {
 
     Object[][] getData();
 

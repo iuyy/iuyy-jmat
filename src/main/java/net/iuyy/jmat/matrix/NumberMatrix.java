@@ -13,10 +13,19 @@ public class NumberMatrix extends AbstractMatrix<Number> {
 
     private Number[][] data;
 
+    public NumberMatrix() {
+    }
+
     public NumberMatrix(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
         this.data = new Number[rows][columns];
+    }
+
+    public NumberMatrix(Number[][] data) {
+        this.rows = data.length;
+        this.columns = data[0].length;
+        this.data = data;
     }
 
     @Override
